@@ -15,7 +15,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API routes
+// Assignment-required endpoints
+app.use('/', userRoutes);
+
+// Existing endpoints for backward compatibility
 app.use('/users', userRoutes);
+
+// News routes
 app.use('/news', newsRoutes);
 
 // Handle unknown routes

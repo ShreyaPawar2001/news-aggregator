@@ -11,6 +11,21 @@ const {
 
 const registerUser = async ({ name, email, password, preferences }) => {
     // Normalize email to prevent case-sensitive duplicates
+    // Validate required fields before processing
+    if (
+        typeof email !== 'string' ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+    ) {
+        const error = new Error('A valid email address is required');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    if (typeof password !== 'string' || password.length < 8) {
+        const error = new Error('Password must be at least 8 characters long');
+        error.statusCode = 400;
+        throw error;
+    }
     const normalizedEmail = email.trim().toLowerCase();
 
     // Check if user already exists
@@ -22,6 +37,22 @@ const registerUser = async ({ name, email, password, preferences }) => {
         throw error;
     }
 
+    // Validate news preferences before saving
+    if (
+        preferences !== undefined &&
+        (
+            !Array.isArray(preferences) ||
+            !preferences.every(
+                (preference) =>
+                    typeof preference === 'string' &&
+                    preference.trim().length > 0
+            )
+        )
+    ) {
+        const error = new Error('Preferences must be an array of non-empty strings');
+        error.statusCode = 400;
+        throw error;
+    }
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -31,7 +62,9 @@ const registerUser = async ({ name, email, password, preferences }) => {
         name: name.trim(),
         email: normalizedEmail,
         password: hashedPassword,
-        preferences: preferences || []
+        preferences: preferences === undefined
+            ? []
+            : preferences.map((preference) => preference.trim())
     };
 
     // Save user in data store

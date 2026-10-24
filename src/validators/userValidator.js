@@ -1,6 +1,6 @@
 
 const validateSignup = (req, res, next) => {
-    const { name, email, password, preferences } = req.body;
+    const { name, email, password, preferences } = req.body || {};
 
     if (typeof name !== 'string' || !name.trim()) {
         return res.status(400).json({
