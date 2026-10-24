@@ -37,26 +37,22 @@ const login = async (req, res, next) => {
 };
 
 
-const getPreferences = (req, res, next) => {
+const getPreferences = async (req, res, next) => {
     try {
         // Get user ID from verified JWT
         const userId = req.user.id;
 
         // Fetch preferences from service
-        const preferences = getUserPreferences(userId);
+        const preferences = await getUserPreferences(userId);
 
-        // Send response
-        return res.status(200).json({
-            preferences
-        });
-
+        return res.status(200).json({ preferences });
     } catch (error) {
         next(error);
     }
 };
 
 
-const putPreferences = (req, res, next) => {
+const putPreferences = async (req, res, next) => {
     try {
         // Get authenticated user ID from JWT
         const userId = req.user.id;
@@ -65,7 +61,7 @@ const putPreferences = (req, res, next) => {
         const { preferences } = req.body;
 
         // Update preferences using service layer
-        const updatedPreferences = updatePreferences(
+        const updatedPreferences = await  updatePreferences(
             userId,
             preferences
         );
