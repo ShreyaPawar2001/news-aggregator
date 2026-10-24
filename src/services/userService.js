@@ -9,9 +9,14 @@ const {
     updateUserPreferences
 } = require('../data/userStore');
 
-const registerUser = async ({ name, email, password, preferences }) => {
-    // Normalize email to prevent case-sensitive duplicates
-    // Validate required fields before processing
+const registerUser = async ({ name, email, password, preferences } = {}) => {
+    // Validate registration fields before processing
+    if (typeof name !== 'string' || !name.trim()) {
+        const error = new Error('Name is required');
+        error.statusCode = 400;
+        throw error;
+    }
+
     if (
         typeof email !== 'string' ||
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
@@ -26,33 +31,9 @@ const registerUser = async ({ name, email, password, preferences }) => {
         error.statusCode = 400;
         throw error;
     }
+
+    // Normalize email after validation
     const normalizedEmail = email.trim().toLowerCase();
-
-    // Check if user already exists
-    const existingUser = findUserByEmail(normalizedEmail);
-
-    if (existingUser) {
-        const error = new Error('User already exists');
-        error.statusCode = 409;
-        throw error;
-    }
-
-    // Validate news preferences before saving
-    if (
-        preferences !== undefined &&
-        (
-            !Array.isArray(preferences) ||
-            !preferences.every(
-                (preference) =>
-                    typeof preference === 'string' &&
-                    preference.trim().length > 0
-            )
-        )
-    ) {
-        const error = new Error('Preferences must be an array of non-empty strings');
-        error.statusCode = 400;
-        throw error;
-    }
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
 
